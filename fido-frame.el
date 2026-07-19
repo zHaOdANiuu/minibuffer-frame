@@ -3,6 +3,7 @@
 ;; Copyright (C) 2026 Daniu Zhao
 
 ;; Author: Daniu Zhao <zhaodaniu1@gmail.com>
+;; Assisted-by: DeepSeek:DeepSeek-v4-pro
 ;; Homepage: https://github.com/zHaOdANiuu/fido-frame
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "28.1"))
