@@ -5,8 +5,8 @@
 ;; Author: Daniu Zhao <zhaodaniu1@gmail.com>
 ;; Homepage: https://github.com/zHaOdANiuu/fido-frame
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "26.1"))
-;; Keywords: fido child-frame
+;; Package-Requires: ((emacs "28.1"))
+;; Keywords: convenience, fido, child-frame
 
 ;; This file is not part of GNU Emacs.
 
@@ -99,7 +99,7 @@
                       1)))
 
 (defun fido-frame--max-mini-lines (_orig-fun &optional _frame)
-  "Return fido-frame-max-height so icomplete positions correctly."
+  "Return `fido-frame-max-height' so icomplete positions correctly."
   fido-frame-max-height)
 
 (defun fido-frame-exit ()
