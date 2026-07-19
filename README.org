@@ -7,7 +7,7 @@ minibuffer area at the bottom of the window.
 
 ** Installation
 *** Requirements
-- Emacs 26.1 or later
+- Emacs 28.1 or later
 - fido-mode (built-in since Emacs 27)
 
 *** Manual Installation
