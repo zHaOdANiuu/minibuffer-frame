@@ -1,61 +1,45 @@
-* fido-frame
+* minibuffer-frame
 
-** What is fido-frame?
-fido-frame is an Emacs package that displays the fido minibuffer
-completions in a centered child frame, instead of the default
-minibuffer area at the bottom of the window.
-
-** Installation
-*** Requirements
-- Emacs 28.1 or later
-- fido-mode (built-in since Emacs 27)
-
-*** Manual Installation
-Clone the repository and add to your =load-path=:
-
-#+begin_src shell
-  git clone https://github.com/zHaOdANiuu/fido-frame.git
-#+end_src
-
-#+begin_src emacs-lisp
-  (add-to-list 'load-path "/path/to/fido-frame")
-  (require 'fido-frame)
-#+end_src
+Show the fido minibuffer in a floating child frame centered on the
+parent frame.  The frame grows with wrapped input and completion
+candidates, and handles recursive minibuffers.
 
 ** Usage
+
 #+begin_src emacs-lisp
-  (fido-mode 1)           ;; enable fido completions
-  (fido-vertical-mode 1)  ;; optional: vertical display
-  (fido-frame-mode 1)     ;; enable child frame
+(require 'minibuffer-frame)
+(minibuffer-frame-mode 1)
+#+end_src
+
+fido-mode and fido-vertical-mode are recommended:
+
+#+begin_src emacs-lisp
+(fido-mode 1)
+(fido-vertical-mode 1)
 #+end_src
 
 ** Customization
-Customize the child frame appearance with =M-x customize-group RET fido-frame RET=:
 
-| Variable                 | Default | Description                         |
-|--------------------------+---------+-------------------------------------|
-| =fido-frame-width=         | 0.5     | Width as a fraction of parent frame |
-| =fido-frame-left=          | 0.5     | Left offset as a fraction of parent |
-| =fido-frame-top=           | 0.3     | Top offset as a fraction of parent  |
-| =fido-frame-max-height=    | 10      | Maximum height in lines             |
+=M-x customize-group RET minibuffer-frame RET=
+
+| Variable                    | Default | Description                            |
+|-----------------------------+---------+----------------------------------------|
+| minibuffer-frame-width      | 0.5     | Frame width (fraction of parent)       |
+| minibuffer-frame-left       | 0.5     | Frame left offset (fraction of parent) |
+| minibuffer-frame-top        | 0.3     | Frame top offset (fraction of parent)  |
+| minibuffer-frame-max-height | 10      | Maximum frame height in lines          |
 
 ** Example
-Here's fido-frame in action:
 
-#+ATTR_ORG: :width 600
 [[file:example/a.gif]]
 
 ** How It Works
-1. =fido-frame-setup= runs on =minibuffer-setup-hook=, creating a child
-   frame and moving focus to it.
-2. =fido-frame-resize= adjusts the frame height dynamically to fit
-   the number of completion candidates.
-3. =fido-frame-exit= hides the child frame and restores focus to the
-   parent frame on =minibuffer-exit-hook=.
-4. The advice on =max-mini-window-lines= tells icomplete to use
-   =fido-frame-max-height= for vertical layout calculations.
 
-** Why Use a Child Frame?
-- Completions appear centered on screen, reducing eye movement.
-- The child frame floats above other windows without disturbing layout.
-- Works seamlessly with fido-mode and icomplete.
+- =minibuffer-setup-hook= moves the minibuffer into the child frame.
+- The frame height is recomputed on every content change: long input
+  wraps at the frame width and the frame grows to fit, up to
+  =minibuffer-frame-max-height=; it shrinks again when input shortens.
+- Recursive minibuffers reuse the same frame; the frame is hidden and
+  focus returned to the parent only when the outermost minibuffer exits.
+- An advice on =max-mini-window-lines= lets icomplete lay out its
+  candidates inside the child frame.
