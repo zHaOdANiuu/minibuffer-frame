@@ -6,49 +6,11 @@ candidates, and handles recursive minibuffers.
 
 ** Installation
 
-*** With use-package (package-vc)
-
 #+begin_src emacs-lisp
 (use-package minibuffer-frame
   :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame" :rev :newest)
   :init (minibuffer-frame-mode 1))
 #+end_src
-
-*** Manually
-
-#+begin_src emacs-lisp
-(add-to-list 'load-path "/path/to/minibuffer-frame")
-(require 'minibuffer-frame)
-(minibuffer-frame-mode 1)
-#+end_src
-
-fido-mode and fido-vertical-mode are recommended:
-
-#+begin_src emacs-lisp
-(fido-mode 1)
-(fido-vertical-mode 1)
-#+end_src
-
-*** Notes on package-vc installation
-
-=package-vc= (=:vc=) installs by checking out the whole repository, so
-files other than =minibuffer-frame.el= (=test.el=, =Makefile=, ...) are
-present in the package directory but are never loaded: autoloads are
-only generated for files with =;;;###autoload= cookies, and subdirectories
-are not scanned at all.
-
-The =:ignored-files= spec option (Emacs 30+) can exclude files from
-dependency scanning:
-
-#+begin_src emacs-lisp
-(use-package minibuffer-frame
-  :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame"
-            :rev :newest
-            :ignored-files ("test.el")))
-#+end_src
-
-Note that =:ignored-files= only skips dependency scanning for the
-listed files; it does not remove them from the checkout.
 
 ** Customization
 
@@ -57,7 +19,6 @@ listed files; it does not remove them from the checkout.
 | Variable                    | Default | Description                            |
 |-----------------------------+---------+----------------------------------------|
 | minibuffer-frame-width      | 0.5     | Frame width (fraction of parent)       |
-| minibuffer-frame-left       | 0.5     | Frame left offset (fraction of parent) |
 | minibuffer-frame-top        | 0.3     | Frame top offset (fraction of parent)  |
 | minibuffer-frame-max-height | 10      | Maximum frame height in lines          |
 

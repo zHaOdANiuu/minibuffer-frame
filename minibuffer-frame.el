@@ -97,6 +97,11 @@
   minibuffer-frame-max-height)
 
 (defun minibuffer-frame--other-window (orig-fn &rest args)
+  "Around advice for `other-window' keeping focus on the active minibuffer.
+ORIG-FN and ARGS are the original function and its arguments.  Switching
+windows while the minibuffer child frame is selected moves focus to the
+parent frame; otherwise focus is returned to the child frame when the
+switch does not change the selected window."
   (if (and (eq (selected-frame) minibuffer-frame--frame)
            (cl-plusp minibuffer-frame--depth))
       (let ((parent (frame-parent minibuffer-frame--frame)))
@@ -113,6 +118,7 @@
         (select-frame-set-input-focus minibuffer-frame--frame)))))
 
 (defun minibuffer-frame--restore-focus ()
+  "Restore input focus to the minibuffer child frame after focus changes."
   (when (and minibuffer-frame--skip-restore
              (cl-plusp minibuffer-frame--depth)
              (frame-live-p minibuffer-frame--frame))
