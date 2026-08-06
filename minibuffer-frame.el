@@ -26,14 +26,44 @@
 
 ;;; Commentary:
 
-;; Display fido completions in a floating child frame
-;; centered on the parent frame, instead of the default minibuffer
-;; area at the bottom of the window.
-;;
+;; Show the minibuffer in a floating child frame centered on the
+;; selected frame.  The frame is undecorated and stays above other
+;; windows; it is sized for fido/icomplete completion candidates,
+;; growing to fit wrapped input and candidates up to
+;; `minibuffer-frame-max-height' and shrinking again when input
+;; shortens.  Recursive minibuffers reuse the same frame; it is hidden
+;; and focus returns to the parent only when the outermost minibuffer
+;; exits.
+
 ;; Usage:
+;;
 ;;   (require 'minibuffer-frame)
 ;;   (minibuffer-frame-mode 1)
-
+;;
+;; fido-mode and fido-vertical-mode are recommended for the vertical
+;; candidate layout this frame is tuned for:
+;;
+;;   (fido-vertical-mode 1)
+;;   (minibuffer-frame-mode 1)
+;;
+;; Install with use-package:
+;;
+;;   (use-package minibuffer-frame
+;;     :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame" :rev :newest)
+;;     :init (minibuffer-frame-mode 1))
+;;
+;; Customize with `M-x customize-group RET minibuffer-frame RET':
+;;
+;; - `minibuffer-frame-width'      -- width as a fraction of the parent frame
+;; - `minibuffer-frame-top'        -- top offset as a fraction of the parent frame
+;; - `minibuffer-frame-max-height' -- maximum height of the frame in lines
+;;
+;; The mode wires `minibuffer-frame-setup' and `minibuffer-frame-exit'
+;; into the minibuffer hooks, resizes the frame after
+;; `icomplete-exhibit', advises `max-mini-window-lines' so icomplete
+;; lays out candidates inside the frame, and keeps input focus on the
+;; frame while a minibuffer is active.
+;;
 ;;; Code:
 
 (require 'cl-lib)
@@ -47,7 +77,8 @@
 (defvar minibuffer-frame--depth 0
   "Nesting depth of active minibuffers (0 = none).")
 
-(defvar minibuffer-frame--skip-restore t)
+(defvar minibuffer-frame--skip-restore t
+  "Non-nil while focus must not be restored to the child frame.")
 
 (defgroup minibuffer-frame nil
   "Display fido completions in a centered child frame."
