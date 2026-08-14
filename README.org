@@ -33,6 +33,8 @@ candidates, and handles recursive minibuffers.
   wraps at the frame width and the frame grows to fit, up to
   =minibuffer-frame-max-height=; it shrinks again when input shortens.
 - Recursive minibuffers reuse the same frame; the frame is hidden and
-  focus returned to the parent only when the outermost minibuffer exits.
+  focus returns to the exact frame and window selected before the outermost
+  minibuffer exits.  If Emacs loses external focus while the minibuffer is
+  active, the child frame is hidden and shown again without taking focus.
 - An advice on =max-mini-window-lines= lets icomplete lay out its
   candidates inside the child frame.

@@ -108,7 +108,8 @@
 (defun minibuffer-frame--handle-focus ()
   "Restore focus to the child frame after focus changes."
   (when (and (not minibuffer-frame--skip-focus)
-             (frame-live-p minibuffer-frame--frame))
+             (frame-live-p minibuffer-frame--frame)
+             (active-minibuffer-window))
     (select-frame-set-input-focus minibuffer-frame--frame)))
 
 (defun minibuffer-frame--other-window (orig-fn &rest args)
@@ -119,7 +120,7 @@ ORIG-FN and ARGS are the advised function and its arguments."
         (when (frame-live-p parent)
           (setq minibuffer-frame--skip-focus t)
           (select-frame-set-input-focus parent)
-          (run-with-timer 0.1 nil (lambda () (setq minibuffer-frame--skip-focus nil)))))
+          (run-with-timer 1 nil (lambda () (setq minibuffer-frame--skip-focus nil)))))
     (let ((start (selected-window)))
       (apply orig-fn args)
       (if (and (eq (selected-window) start)
@@ -137,15 +138,13 @@ ORIG-FN and ARGS are the advised function and its arguments."
         (advice-add 'icomplete-exhibit :after #'minibuffer-frame--icomplete-exhibit)
         (advice-add 'max-mini-window-lines :around #'minibuffer-frame--max-mini-window-lines)
         (advice-add 'other-window :around #'minibuffer-frame--other-window)
-        (add-function :after after-focus-change-function
-          #'minibuffer-frame--handle-focus))
+        (add-function :after after-focus-change-function #'minibuffer-frame--handle-focus))
     (remove-hook 'minibuffer-setup-hook #'minibuffer-frame--setup)
     (remove-hook 'minibuffer-exit-hook #'minibuffer-frame--exit)
     (advice-remove 'icomplete-exhibit #'minibuffer-frame--icomplete-exhibit)
     (advice-remove 'max-mini-window-lines #'minibuffer-frame--max-mini-window-lines)
     (advice-remove 'other-window #'minibuffer-frame--other-window)
-    (remove-function after-focus-change-function
-                     #'minibuffer-frame--handle-focus)
+    (remove-function after-focus-change-function #'minibuffer-frame--handle-focus)
     (when (frame-live-p minibuffer-frame--frame)
       (delete-frame minibuffer-frame--frame))))
 

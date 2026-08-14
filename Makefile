@@ -1,7 +1,7 @@
 .PHONY: all lint byte-compile package-lint checkdoc docquotes run clean
 MAKEFLAGS := -rR
 
-EMACS ?= emacs
+EMACS := emacs
 
 test-entry := test.el
 el-args := minibuffer-frame.el
@@ -14,7 +14,7 @@ all: byte-compile lint run
 lint: package-lint checkdoc docquotes
 
 run: $(elc-args)
-	$(EMACS) -Q \
+	$(EMACS) \
 		-L . \
 		-l $(test-entry)
 
