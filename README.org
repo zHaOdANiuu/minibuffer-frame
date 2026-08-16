@@ -1,8 +1,8 @@
 * minibuffer-frame
 
-Show the fido minibuffer in a floating child frame centered on the
-parent frame.  The frame grows with wrapped input and completion
-candidates, and handles recursive minibuffers.
+Show the Fido/icomplete minibuffer in a child frame centered on the
+parent frame, sized to fit the completion candidates, and reused
+across recursive minibuffers.
 
 ** Installation
 
@@ -16,11 +16,14 @@ candidates, and handles recursive minibuffers.
 
 =M-x customize-group RET minibuffer-frame RET=
 
-| Variable                    | Default | Description                            |
-|-----------------------------+---------+----------------------------------------|
-| minibuffer-frame-width      | 0.5     | Frame width (fraction of parent)       |
-| minibuffer-frame-top        | 0.3     | Frame top offset (fraction of parent)  |
-| minibuffer-frame-max-height | 10      | Maximum frame height in lines          |
+| Variable               | Default | Description                           |
+|------------------------+---------+---------------------------------------|
+| minibuffer-frame-width | 0.5     | Frame width (fraction of parent)      |
+| minibuffer-frame-top   | 0.3     | Frame top offset (fraction of parent) |
+
+The number of candidate lines icomplete shows inside the frame is
+bounded by the built-in =completions-max-height= (one line when it is
+unset).
 
 ** Example
 
@@ -28,13 +31,14 @@ candidates, and handles recursive minibuffers.
 
 ** How It Works
 
-- =minibuffer-setup-hook= moves the minibuffer into the child frame.
-- The frame height is recomputed on every content change: long input
-  wraps at the frame width and the frame grows to fit, up to
-  =minibuffer-frame-max-height=; it shrinks again when input shortens.
-- Recursive minibuffers reuse the same frame; the frame is hidden and
-  focus returns to the exact frame and window selected before the outermost
-  minibuffer exits.  If Emacs loses external focus while the minibuffer is
-  active, the child frame is hidden and shown again without taking focus.
-- An advice on =max-mini-window-lines= lets icomplete lay out its
-  candidates inside the child frame.
+- =minibuffer-setup-hook= creates the child frame on demand, centered
+  on the parent at =minibuffer-frame-top=, and for the outermost
+  minibuffer shows and focuses it.
+- An advice on =icomplete-exhibit= sizes the frame to the completion
+  candidates; an advice on =max-mini-window-lines= lets icomplete lay
+  those candidates out inside the child frame.
+- Recursive minibuffers reuse the same frame without stealing focus;
+  it is hidden again when the outermost minibuffer exits.
+- =after-focus-change-function= returns focus to the child frame while
+  the minibuffer is active, and an advice on =other-window= lets you
+  leave the minibuffer and cycle back into it.

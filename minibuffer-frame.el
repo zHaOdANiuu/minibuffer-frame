@@ -3,7 +3,6 @@
 ;; Copyright (C) 2026 Daniu Zhao
 
 ;; Author: Daniu Zhao <zhaodaniu1@gmail.com>
-;; Assisted-by: DeepSeek:DeepSeek-v4-pro
 ;; Homepage: https://github.com/zHaOdANiuu/minibuffer-frame
 ;; Version: 0.0.3
 ;; Package-Requires: ((emacs "28.1"))
@@ -81,11 +80,12 @@
   "Show and focus the child frame for the active minibuffer."
   (unless minibuffer-frame--frame
     (minibuffer-frame--init))
-  (select-frame-set-input-focus minibuffer-frame--frame)
-  (make-frame-visible minibuffer-frame--frame)
-  (setq minibuffer-frame--saved-minibuffer-follow
-        minibuffer-follows-selected-frame)
-  (setq minibuffer-follows-selected-frame nil))
+  (when (= (minibuffer-depth) 1)
+    (make-frame-visible minibuffer-frame--frame)
+    (select-frame-set-input-focus minibuffer-frame--frame)
+    (setq minibuffer-frame--saved-minibuffer-follow
+          minibuffer-follows-selected-frame)
+    (setq minibuffer-follows-selected-frame nil)))
 
 (defun minibuffer-frame--exit ()
   "Hide the child frame after the outermost minibuffer exits."
@@ -113,19 +113,19 @@
     (select-frame-set-input-focus minibuffer-frame--frame)))
 
 (defun minibuffer-frame--other-window (orig-fn &rest args)
-  "Keep `other-window' navigation on the minibuffer child frame.
-ORIG-FN and ARGS are the advised function and its arguments."
-  (if (eq (selected-frame) minibuffer-frame--frame)
-      (let ((parent (frame-parent minibuffer-frame--frame)))
-        (when (frame-live-p parent)
-          (setq minibuffer-frame--skip-focus t)
-          (select-frame-set-input-focus parent)
-          (run-with-timer 1 nil (lambda () (setq minibuffer-frame--skip-focus nil)))))
+  "Redirect `other-window' to the child frame when it cycles back."
+  (cond
+   ((and (frame-live-p minibuffer-frame--frame)
+         (eq (selected-frame) minibuffer-frame--frame))
+    (setq minibuffer-frame--skip-focus t)
+    (select-frame-set-input-focus (frame-parent minibuffer-frame--frame))
+    (run-with-idle-timer 0.1 nil (lambda () (setq minibuffer-frame--skip-focus nil))))
+   (t
     (let ((start (selected-window)))
       (apply orig-fn args)
-      (if (and (eq (selected-window) start)
-               (frame-live-p minibuffer-frame--frame))
-          (select-frame-set-input-focus minibuffer-frame--frame)))))
+      (when (and (eq (selected-window) start)
+                 (frame-live-p minibuffer-frame--frame))
+        (select-frame-set-input-focus minibuffer-frame--frame))))))
 
 ;;;###autoload
 (define-minor-mode minibuffer-frame-mode
