@@ -113,7 +113,7 @@
     (select-frame-set-input-focus minibuffer-frame--frame)))
 
 (defun minibuffer-frame--other-window (orig-fn &rest args)
-  "Redirect `other-window' to the child frame when it cycles back."
+  "Redirect ORIG-FN to the child frame.  Pass ARGS to `other-window'."
   (cond
    ((and (frame-live-p minibuffer-frame--frame)
          (eq (selected-frame) minibuffer-frame--frame))

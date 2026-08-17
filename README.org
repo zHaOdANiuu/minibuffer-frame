@@ -42,3 +42,10 @@ unset).
 - =after-focus-change-function= returns focus to the child frame while
   the minibuffer is active, and an advice on =other-window= lets you
   leave the minibuffer and cycle back into it.
+
+** Development
+
+Run =make lint= to check package metadata, docstrings, and documentation
+quote style.  Run =make byte-compile= to byte-compile the package with
+warnings treated as errors, or =make all= to compile, lint, and run the
+smoke test together.
