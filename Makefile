@@ -1,9 +1,9 @@
 .PHONY: all lint byte-compile package-lint checkdoc docquotes run clean
 MAKEFLAGS := -rR
 
-EMACS := /d/local/bin/emacs
+EMACS := emacs
 
-test-entry := test.el
+test-file := test.el
 el-args := minibuffer-frame.el
 elc-args := $(el-args:.el=.elc)
 
@@ -11,20 +11,22 @@ elisp-string-list = $(patsubst %,\"%\",$(1))
 
 all: byte-compile lint run
 
-lint: package-lint checkdoc docquotes
+byte-compile: $(elc-args)
+
+check-error: docquotes
+
+lint: package-lint checkdoc
 
 run: $(elc-args)
-	$(EMACS) \
+	$(EMACS) -Q \
 		-L . \
-		-l $(test-entry)
+		-l $(test-file)
 
 $(elc-args): %.elc : %.el
 	$(EMACS) -Q --batch \
 		--eval "(setq byte-compile-error-on-warn t)" \
 		-L . \
 		-f batch-byte-compile $<
-
-byte-compile: $(elc-args)
 
 package-lint: $(el-args)
 	$(EMACS) --batch -Q -L . \

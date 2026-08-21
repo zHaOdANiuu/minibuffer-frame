@@ -1,51 +1,52 @@
 * minibuffer-frame
 
-Show the Fido/icomplete minibuffer in a child frame centered on the
-parent frame, sized to fit the completion candidates, and reused
-across recursive minibuffers.
+Display the minibuffer in a child frame centered relative to the parent frame.
+
+** Requirements
+
+- Emacs 28.1 or newer
+- A graphical Emacs session (GUI frame)
+
+Windows Terminal usually runs Emacs in a terminal frame. Terminal frames do not support the child frames, pixel-based positioning, or graphical focus handling required by this package, so the package may not work correctly there. On Windows, use a graphical Emacs session instead of terminal Emacs in Windows Terminal.
 
 ** Installation
 
 #+begin_src emacs-lisp
 (use-package minibuffer-frame
+  :if (display-graphic-p)
   :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame" :rev :newest)
-  :init (minibuffer-frame-mode 1))
+  :hook (window-setup . minibuffer-frame-mode))
 #+end_src
 
-** Customization
+If Emacs always runs in a graphical environment, such as a graphical Linux or macOS session, you can remove =:if (display-graphic-p)=:
 
-=M-x customize-group RET minibuffer-frame RET=
+** Configuration
 
-| Variable               | Default | Description                           |
-|------------------------+---------+---------------------------------------|
-| minibuffer-frame-width | 0.5     | Frame width (fraction of parent)      |
-| minibuffer-frame-top   | 0.3     | Frame top offset (fraction of parent) |
+Use =M-x customize-group RET minibuffer-frame RET=, or set the variables directly:
 
-The number of candidate lines icomplete shows inside the frame is
-bounded by the built-in =completions-max-height= (one line when it is
-unset).
+| Variable               | Default | Description                               |
+|------------------------+---------+-------------------------------------------|
+| =minibuffer-frame-width= |     0.5 | Child frame width as a fraction of parent |
+| =minibuffer-frame-top=   |     0.3 | Top offset as a fraction of parent        |
 
-** Example
+The number of completion lines is controlled by Emacs's built-in =completions-max-height= variable. When it is unset, the frame displays one line.
+
+** Demo
 
 [[file:example/a.gif]]
 
-** How It Works
+** How it works
 
-- =minibuffer-setup-hook= creates the child frame on demand, centered
-  on the parent at =minibuffer-frame-top=, and for the outermost
-  minibuffer shows and focuses it.
-- An advice on =icomplete-exhibit= sizes the frame to the completion
-  candidates; an advice on =max-mini-window-lines= lets icomplete lay
-  those candidates out inside the child frame.
-- Recursive minibuffers reuse the same frame without stealing focus;
-  it is hidden again when the outermost minibuffer exits.
-- =after-focus-change-function= returns focus to the child frame while
-  the minibuffer is active, and an advice on =other-window= lets you
-  leave the minibuffer and cycle back into it.
+- Creates and centers the child frame when the minibuffer is first activated.
+- Resizes the frame according to the completion candidates.
+- Reuses the same frame for recursive minibuffer sessions.
+- Hides the frame after the outermost minibuffer exits.
+- Restores focus while the minibuffer is active and supports returning after =other-window=.
 
 ** Development
 
-Run =make lint= to check package metadata, docstrings, and documentation
-quote style.  Run =make byte-compile= to byte-compile the package with
-warnings treated as errors, or =make all= to compile, lint, and run the
-smoke test together.
+#+begin_src sh
+make all
+#+end_src
+
+You can also run =make lint=, =make byte-compile=, or =make run= separately.
