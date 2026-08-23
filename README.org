@@ -15,7 +15,7 @@ Windows Terminal usually runs Emacs in a terminal frame. Terminal frames do not 
 (use-package minibuffer-frame
   :if (display-graphic-p)
   :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame" :rev :newest)
-  :hook (window-setup . minibuffer-frame-mode))
+  :hook window-setup
 #+end_src
 
 If Emacs always runs in a graphical environment, such as a graphical Linux or macOS session, you can remove =:if (display-graphic-p)=:
@@ -26,14 +26,14 @@ Use =M-x customize-group RET minibuffer-frame RET=, or set the variables directl
 
 | Variable               | Default | Description                               |
 |------------------------+---------+-------------------------------------------|
-| =minibuffer-frame-width= |     0.5 | Child frame width as a fraction of parent |
-| =minibuffer-frame-top=   |     0.3 | Top offset as a fraction of parent        |
+| =minibuffer-frame-width= |   0.5   | Child frame width as a fraction of parent |
+| =minibuffer-frame-top=   |   0.3   | Top offset as a fraction of parent        |
 
 The number of completion lines is controlled by Emacs's built-in =completions-max-height= variable. When it is unset, the frame displays one line.
 
 ** Demo
 
-[[file:example/a.gif]]
+[[file:test/a.gif]]
 
 ** How it works
 
