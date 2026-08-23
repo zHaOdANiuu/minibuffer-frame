@@ -97,13 +97,13 @@
 
 (defun minibuffer-frame--icomplete-exhibit ()
   "Resize the child frame to fit icomplete completions."
-  (set-frame-height
-   minibuffer-frame--frame
-   (cl-count ?\n (overlay-get icomplete-overlay 'after-string))))
+  (set-frame-height minibuffer-frame--frame
+                    (min (safe-length completion-all-sorted-completions)
+                         (or completions-max-height 10))))
 
 (defun minibuffer-frame--max-mini-window-lines (_orig-fn &optional _frame)
   "Return `completions-max-height' for `max-mini-window-lines'."
-  (or completions-max-height 1))
+  (or completions-max-height 10))
 
 (defun minibuffer-frame--handle-focus ()
   "Restore focus to the child frame after focus changes."
@@ -119,7 +119,7 @@
          (eq (selected-frame) minibuffer-frame--frame))
     (setq minibuffer-frame--skip-focus t)
     (select-frame-set-input-focus (frame-parent minibuffer-frame--frame))
-    (run-with-idle-timer 0.1 nil (lambda () (setq minibuffer-frame--skip-focus nil))))
+    (run-with-timer 0.1 nil (lambda () (setq minibuffer-frame--skip-focus nil))))
    (t
     (let ((start (selected-window)))
       (apply orig-fn args)
