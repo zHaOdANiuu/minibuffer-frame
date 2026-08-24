@@ -4,17 +4,17 @@ Display the minibuffer in a child frame centered relative to the parent frame.
 
 ** Requirements
 
-- Emacs 28.1 or newer
-- A graphical Emacs session (GUI frame)
+- [X] Emacs 28.1 or newer
 
 Windows Terminal usually runs Emacs in a terminal frame. Terminal frames do not support the child frames, pixel-based positioning, or graphical focus handling required by this package, so the package may not work correctly there. On Windows, use a graphical Emacs session instead of terminal Emacs in Windows Terminal.
 
 ** Installation
 
+[[https://melpa.org/#/minibuffer-frame][Now available MELPA.]]
+
 #+begin_src emacs-lisp
 (use-package minibuffer-frame
   :if (display-graphic-p)
-  :vc (:url "https://github.com/zHaOdANiuu/minibuffer-frame" :rev :newest)
   :hook window-setup
 #+end_src
 
@@ -30,6 +30,7 @@ Use =M-x customize-group RET minibuffer-frame RET=, or set the variables directl
 | =minibuffer-frame-top=   |   0.3   | Top offset as a fraction of parent        |
 
 The number of completion lines is controlled by Emacs's built-in =completions-max-height= variable. When it is unset, the frame displays one line.
+Because the child-frame implementation used here doesn’t work well in Windows terminals; it may behave better on Linux or macOS.
 
 ** Demo
 
@@ -42,11 +43,3 @@ The number of completion lines is controlled by Emacs's built-in =completions-ma
 - Reuses the same frame for recursive minibuffer sessions.
 - Hides the frame after the outermost minibuffer exits.
 - Restores focus while the minibuffer is active and supports returning after =other-window=.
-
-** Development
-
-#+begin_src sh
-make all
-#+end_src
-
-You can also run =make lint=, =make byte-compile=, or =make run= separately.

@@ -1,7 +1,7 @@
-.PHONY: all lint byte-compile package-lint checkdoc ceckparens docquotes run clean
+.PHONY: all lint byte-compile package-lint checkdoc docquotes test clean
 MAKEFLAGS := -rR
 
-EMACS := /d/local/bin/emacs
+EMACS := emacs
 
 test-file := test/test.el
 el-args := minibuffer-frame.el
@@ -11,23 +11,21 @@ elisp-string-list = $(patsubst %,\"%\",$(1))
 
 all: byte-compile lint run
 
-byte-compile: $(elc-args)
+bytecompile: $(elc-args)
 
-lint: package-lint checkdoc
-
-run: $(elc-args)
-	$(EMACS) -Q \
-		-L . \
-		-l $(test-file)
+lint: package-lint checkdoc docquotes
 
 $(elc-args): %.elc : %.el
-	$(EMACS) --batch -Q \
-		--eval "(setq byte-compile-error-on-warn t)" \
-		-L . \
-		-f batch-byte-compile $<
+	@$(EMACS) --batch -Q --eval "(progn\
+	(when (file-exists-p \"$@\")\
+	  (delete-file \"$@\"))\
+	(setq with-editor-emacsclient-executable nil)\
+	(when (< emacs-major-version 30)\
+	  (require 'transient)))" \
+	-f batch-byte-compile $<
 
 package-lint: $(el-args)
-	$(EMACS) --batch -Q -L . \
+	@$(EMACS) --batch -Q \
 		--eval "(progn\
       (package-initialize)\
       (require 'package-lint)\
@@ -35,7 +33,7 @@ package-lint: $(el-args)
         (package-lint-batch-and-exit)))"
 
 checkdoc: $(el-args)
-	$(EMACS) --batch -Q \
+	@$(EMACS) --batch -Q \
 		--eval "(progn\
       (require 'checkdoc)\
       (let ((sentence-end-double-space nil)\
@@ -51,16 +49,6 @@ checkdoc: $(el-args)
             (with-current-buffer \"*Warnings*\"\
               (message \"%s\" (buffer-string)))))\
         (unless ok (kill-emacs 1))))"
-
-checkparens: $(el-args)
-	@$(EMACS) -batch -Q \
-		--eval "(progn \
-		  (dolist (f '($(call elisp-string-list,$(el-args)))) \
-		    (with-current-buffer (find-file-noselect f) \
-		      (condition-case err \
-		        (check-parens) \
-		        (error (message \"%s:%d: %s\" f (line-number-at-pos) (car (cdr err))) (kill-emacs 1))))) \
-		  (kill-emacs 0))"
 
 docquotes: $(el-args)
 	@$(EMACS) --batch -Q \
@@ -78,6 +66,9 @@ docquotes: $(el-args)
                        (1+ (- (match-beginning 0) (line-beginning-position)))\
                        (match-string 0)))))\
         (unless ok (kill-emacs 1))))"
+
+test: $(elc-args)
+	$(EMACS) -L . -l $(test-file)
 
 clean:
 	rm -f *.elc
