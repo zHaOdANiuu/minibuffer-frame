@@ -9,20 +9,21 @@ elc-args := $(el-args:.el=.elc)
 
 elisp-string-list = $(patsubst %,\"%\",$(1))
 
-all: byte-compile lint run
+all: byte-compile lint test
 
 bytecompile: $(elc-args)
 
 lint: package-lint checkdoc docquotes
 
 $(elc-args): %.elc : %.el
-	@$(EMACS) --batch -Q --eval "(progn\
-	(when (file-exists-p \"$@\")\
-	  (delete-file \"$@\"))\
-	(setq with-editor-emacsclient-executable nil)\
-	(when (< emacs-major-version 30)\
-	  (require 'transient)))" \
-	-f batch-byte-compile $<
+	@$(EMACS) --batch -Q \
+		--eval "(progn\
+      (when (file-exists-p \"$@\")\
+        (delete-file \"$@\"))\
+      (setq with-editor-emacsclient-executable nil)\
+      (when (< emacs-major-version 30)\
+        (require 'transient)))" \
+		-f batch-byte-compile $<
 
 package-lint: $(el-args)
 	@$(EMACS) --batch -Q \
@@ -68,7 +69,7 @@ docquotes: $(el-args)
         (unless ok (kill-emacs 1))))"
 
 test: $(elc-args)
-	$(EMACS) -L . -l $(test-file)
+	$(EMACS) -Q -L . -l $(test-file)
 
 clean:
 	rm -f *.elc
