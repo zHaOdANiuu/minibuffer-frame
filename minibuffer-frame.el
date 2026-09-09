@@ -1,8 +1,8 @@
 ;;; minibuffer-frame.el --- Minibuffer in centered child frame -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2026 Daniu Zhao
+;; Copyright (C) 2026 zhaodaniu
 
-;; Author: Daniu Zhao <zhaodaniu1@gmail.com>
+;; Author: zhaodaniu <zhaodaniu1@gmail.com>
 ;; Homepage: https://github.com/zHaOdANiuu/minibuffer-frame
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "28.1"))
@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; Display Fido/icomplete minibuffer in a centered child frame.
+;; Display minibuffer in a centered child frame.
 ;;
 ;; Enable with:
 ;;
@@ -48,7 +48,7 @@
   "Non-nil while temporarily suppressing child-frame focus.")
 
 (defgroup minibuffer-frame nil
-  "Display Fido completions in a centered child frame."
+  "Minibuffer child frame object."
   :group 'convenience
   :prefix "minibuffer-frame-")
 
@@ -102,9 +102,16 @@
   "Resize the child frame to fit icomplete completions."
   (set-frame-height
    minibuffer-frame--frame
-   (min (+ (1+ (length icomplete--scrolled-past))
-           (safe-length completion-all-sorted-completions))
-        (or completions-max-height 10))))
+   (min
+    (+ (1+ (length icomplete--scrolled-past))
+       (if icomplete-vertical-mode
+           (safe-length completion-all-sorted-completions)
+         0)
+       ;; Calculate input line breaks
+       (floor (+ (minibuffer-prompt-width)
+                 (string-width (minibuffer-contents-no-properties)))
+              (frame-width minibuffer-frame--frame)))
+    (or completions-max-height 10))))
 
 (defun minibuffer-frame--max-mini-window-lines (_orig-fn &optional _frame)
   "Return `completions-max-height' for `max-mini-window-lines'."
@@ -113,6 +120,7 @@
 (defun minibuffer-frame--handle-focus ()
   "Restore focus to the child frame after focus changes."
   (when (and (not minibuffer-frame--skip-focus)
+             (active-minibuffer-window)
              (> (minibuffer-depth) 0)
              (frame-live-p minibuffer-frame--frame))
     (select-frame-set-input-focus minibuffer-frame--frame)))
@@ -124,7 +132,8 @@
         (when (frame-live-p parent)
           (setq minibuffer-frame--skip-focus t)
           (select-frame-set-input-focus parent)
-          (run-with-timer 0.1 nil (lambda () (setq minibuffer-frame--skip-focus nil)))))
+          (run-with-idle-timer
+           0.5 nil (lambda () (setq minibuffer-frame--skip-focus nil)))))
     (let ((start (selected-window)))
       (apply orig-fn args)
       (when (and (eq (selected-window) start)
@@ -133,7 +142,7 @@
 
 ;;;###autoload
 (define-minor-mode minibuffer-frame-mode
-  "Display Fido minibuffer completions in a centered child frame."
+  "Display minibuffer in a centered child frame."
   :global t
   (if minibuffer-frame-mode
       (progn
